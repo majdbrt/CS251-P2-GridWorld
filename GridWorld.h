@@ -17,6 +17,18 @@ class GridWorld {
     //   private helper functions
     //   etc.
 
+    struct Node{
+      int ID;
+      Node* next;
+      Node* prev;
+    };
+    struct district{
+      int size;
+      Node* front;
+    };
+    
+    district world;
+
   public:
     /**
     * constructor:  initializes a "world" with nrows and
