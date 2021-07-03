@@ -240,6 +240,9 @@ class GridWorld {
      * return:  indicates success/failure
      */
     bool death(int personID){
+      if(people.empty() || personID >= people.size())
+        return false;
+      
       if(people[personID].alive){
         
         int r = people[personID].distRow;
@@ -266,6 +269,9 @@ class GridWorld {
      * return:  indicates success/failure
      */
     bool whereis(int id, int &row, int &col)const{
+      
+      if(people.empty() || id >= people.size())
+        return false;
 
       if(people[id].alive){
         row = people[id].distRow;
@@ -288,6 +294,8 @@ class GridWorld {
      *   of target district (least seniority) --  see requirements of members().
      */
     bool move(int id, int targetRow, int targetCol){
+      if(people.empty() || id >= people.size())
+        return false;
 
       if(people[id].alive && valid_RowCol(targetRow, targetCol)){
 
