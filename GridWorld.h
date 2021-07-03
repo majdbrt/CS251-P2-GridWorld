@@ -37,27 +37,16 @@ class GridWorld {
       back = nullptr;
     }
 
-    int getSize(){
+    int get_size(){
       return size;
     }
-    void setSize(int x){
-      size = x;
-    }
 
-    Node* getFront(){
+    Node* get_front(){
       return front;
     }
 
-    Node* getBack(){
+    Node* get_back(){
       return back;
-    }
-
-    void setFront(Node* x){
-      front = x;
-    }
-
-    void setBack(Node* x){
-      back = x;
     }
 
     bool is_empty(){
@@ -99,6 +88,7 @@ class GridWorld {
       back = newNode;
       back->prev = cur;
       back->next = nullptr;
+      size++;
     }// push_back
 
     int pop_front(){
@@ -125,6 +115,25 @@ class GridWorld {
       delete cur;
       return x;
     }// pop_front
+
+    void remove_node(Node* x){
+
+      Node* prevNode = x->prev;
+      Node* nextNode = x->next;
+
+      if(prevNode != nullptr)
+        prevNode->next = nextNode;
+      else
+        front = nextNode;
+      
+      if(nextNode != nullptr)
+        nextNode->prev = prevNode;
+      else
+        back = prevNode;
+
+      delete x;
+      size--;
+    }// remove_node
   };    
   
   struct Person{
@@ -145,14 +154,14 @@ class GridWorld {
   int world_cols;
   
   bool valid_RowCol(int row, int col){
-    if(row <= world_rows
+    if(row < world_rows
     && row >= 0
-    && col <= world_cols 
+    && col < world_cols 
     && col >= 0)
       return true;
 
     return false;    
-  }
+  }// valid_RowCol
   public:
     /**
     * constructor:  initializes a "world" with nrows and
@@ -168,9 +177,8 @@ class GridWorld {
       // create the world matrix
       world = new District*[world_rows]();
 
-      for(int i = 0; i < world_rows; i++){
+      for(int i = 0; i < world_rows; i++)
         world[i] = new District[world_cols]();
-      }// for
 
       // create deadPool LL
       deadPool = new District();
@@ -178,9 +186,9 @@ class GridWorld {
     }
     ~GridWorld(){
       // remove the world matrix.
-      for(int i = 0; i < world_rows; i++){
+      for(int i = 0; i < world_rows; i++)
         delete world[i];
-      }// for
+      
       delete world;
 
       // remove deadPool LL
@@ -205,7 +213,7 @@ class GridWorld {
         p.alive = true;
         p.distRow = row;
         p.distCol = row;
-        p.memberPtr = world[row][col].getBack();
+        p.memberPtr = world[row][col].get_back();
 
         id = people.size();
         people.push_back(p);
@@ -217,9 +225,10 @@ class GridWorld {
         people[id].alive = true;
         people[id].distRow = row;
         people[id].distCol = col;
-        people[id].memberPtr = world[row][col].getBack();
+        people[id].memberPtr = world[row][col].get_back();
       }// else
       
+      totalPopulation++;
       return true;
     }
 
@@ -232,33 +241,20 @@ class GridWorld {
      */
     bool death(int personID){
       if(people[personID].alive){
-        deadPool->push_back(personID);
-
-        Node* target = people[personID].memberPtr;
-        Node* prevNode = target->prev;
-        Node* nextNode = target->next;
-
-        people[personID].memberPtr = nullptr;
-        people[personID].alive = false;
+        
         int r = people[personID].distRow;
         int c = people[personID].distCol;
 
-        if(prevNode != nullptr)
-          prevNode->next = nextNode;
-        else
-          world[r][c].setFront(nextNode);
-
-        if(nextNode != nullptr)
-          nextNode->prev = prevNode;
-        else
-          world[r][c].setBack(prevNode);
-
+        world[r][c].remove_node(people[personID].memberPtr);
+        people[personID].memberPtr = nullptr;
+        people[personID].alive = false;
+        
+        deadPool->push_back(personID);
         totalPopulation--;
         
-        world[r][c].setSize(world[r][c].getSize() - 1);
-        delete target;
         return true;
-      }
+      }// if
+
       return false;
     }
 
@@ -270,11 +266,13 @@ class GridWorld {
      * return:  indicates success/failure
      */
     bool whereis(int id, int &row, int &col)const{
+
       if(people[id].alive){
         row = people[id].distRow;
         col = people[id].distCol;
         return true;
-      }
+      }// if
+
       return false;
     }
 
@@ -293,32 +291,17 @@ class GridWorld {
 
       if(people[id].alive && valid_RowCol(targetRow, targetCol)){
 
-        Node* target = people[id].memberPtr;
-        Node* prevNode = people[id].memberPtr->prev;
-        Node* nextNode = people[id].memberPtr->next;
-
         int r = people[id].distRow;
         int c = people[id].distCol;
 
-        if(prevNode != nullptr)
-          prevNode->next = nextNode;
-        else
-          world[r][c].setFront(nextNode);
-
-        if(nextNode != nullptr)
-          nextNode->prev = prevNode;
-        else
-          world[r][c].setBack(prevNode);
-
-        world[r][c].setSize(world[r][c].getSize() - 1);
-        delete target;
+        world[r][c].remove_node(people[id].memberPtr);
 
         r = people[id].distRow = targetRow;
         c = people[id].distCol = targetCol;
 
         world[r][c].push_back(id);
-        world[r][c].setSize(world[r][c].getSize() + 1);
-        people[id].memberPtr = world[r][c].getBack();        
+        people[id].memberPtr = world[r][c].get_back(); 
+
         return true;
       }// if
 
@@ -326,13 +309,15 @@ class GridWorld {
     }
 
     std::vector<int> * members(int row, int col)const{
-      vector<int>* distMembers = new vector<int>;
 
-      Node* cur = world[row][col].getFront();
+      vector<int>* distMembers = new vector<int>;
+      Node* cur = world[row][col].get_front();
+
       while(cur != nullptr){
         distMembers->push_back(cur->ID);
         cur = cur->next;
       }// while
+
       return distMembers;
     }
 
@@ -350,7 +335,7 @@ class GridWorld {
      *   district.  If district does not exist, zero is returned
      */
     int population(int row, int col)const{
-      return world[row][col].getSize();
+      return world[row][col].get_size();
     }
 
     /*
@@ -368,8 +353,6 @@ class GridWorld {
     int num_cols()const {
       return world_cols;
     }
-
-
 
 };
 
