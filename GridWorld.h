@@ -117,22 +117,30 @@ class GridWorld {
     }// pop_front
 
     void remove_node(Node* x){
-
+      
       Node* prevNode = x->prev;
       Node* nextNode = x->next;
 
       if(prevNode != nullptr)
         prevNode->next = nextNode;
+      
+        
       else
         front = nextNode;
+      
+        
       
       if(nextNode != nullptr)
         nextNode->prev = prevNode;
       else
         back = prevNode;
+      
+       
 
-      delete x;
+
       size--;
+      cout << size<< endl;
+      delete x;
     }// remove_node
   };    
   
@@ -212,7 +220,7 @@ class GridWorld {
         Person p;
         p.alive = true;
         p.distRow = row;
-        p.distCol = row;
+        p.distCol = col;
         p.memberPtr = world[row][col].get_back();
 
         id = people.size();
