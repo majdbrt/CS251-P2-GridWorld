@@ -37,6 +37,19 @@ class GridWorld {
       back = nullptr;
     }
 
+    ~District(){
+      Node* cur = front;
+
+      while(cur != nullptr){
+        Node* temp = cur;
+        cur = cur->next;
+        delete temp;
+      }// while
+
+      front = nullptr;
+      back = nullptr;
+    }
+
     int get_size(){
       return size;
     }
@@ -176,10 +189,10 @@ class GridWorld {
       totalPopulation = 0;
       
       // create the world matrix
-      world = new District*[world_rows]();
+      world = new District*[world_rows];
 
       for(int i = 0; i < world_rows; i++)
-        world[i] = new District[world_cols]();
+        world[i] = new District[world_cols];
 
       // create deadPool LL
       deadPool = new District();
@@ -188,9 +201,9 @@ class GridWorld {
     ~GridWorld(){
       // remove the world matrix.
       for(int i = 0; i < world_rows; i++)
-        delete world[i];
+        delete[] world[i];
       
-      delete world;
+      delete[] world;
 
       // remove deadPool LL
       delete deadPool;
