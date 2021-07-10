@@ -117,30 +117,23 @@ class GridWorld {
     }// pop_front
 
     void remove_node(Node* x){
-      
+
       Node* prevNode = x->prev;
       Node* nextNode = x->next;
 
       if(prevNode != nullptr)
         prevNode->next = nextNode;
       
-        
       else
         front = nextNode;
-      
-        
       
       if(nextNode != nullptr)
         nextNode->prev = prevNode;
       else
         back = prevNode;
       
-       
-
-
-      size--;
-      cout << size<< endl;
       delete x;
+      size--;
     }// remove_node
   };    
   
